@@ -45,6 +45,7 @@ module.exports = strapi => {
               'config.info.name',
               'config.admin.url',
               'config.environment',
+              'config.serveAdminPanel',
             ]),
           };
           const content = _.template(index)(data);
