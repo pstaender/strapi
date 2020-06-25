@@ -4,8 +4,12 @@ Thanks to the plugin `Email`, you can send email from your server or externals p
 
 ## Programmatic usage
 
+### Send an email - `.send()`
+
 In your custom controllers or services you may want to send email.
 By using the following function, Strapi will use the configured provider to send an email.
+
+**Example**
 
 ```js
 await strapi.plugins['email'].services.email.send({
@@ -18,6 +22,42 @@ await strapi.plugins['email'].services.email.send({
   text: 'Hello world!',
   html: 'Hello world!',
 });
+```
+
+### Create an email from a template - `.fillEmailOptions()`
+
+When you send an email, you will most likely want to build it from a template you wrote.
+The email plugin provides the service `fillEmailOptions` that builds the email options using the following params:
+
+| param           | description                                                                                                              | type   | default |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ | ------ | ------- |
+| `emailOptions`  | Object that contains email options (to, from, replyTo, cc, bcc) that will be enriched with `subject`, `text` and `html`  | object | `{}`    |
+| `emailTemplate` | Object that contains [lodash string template](https://lodash.com/docs/4.17.15#template) for `subject`, `text` and `html` | object | `{}`    |
+| `data`          | Object that contains the data used by the templates                                                                      | object | `{}`    |
+
+**Example**
+
+```js
+const emailTemplate = {
+  subject: 'Welcome <%= user.username %>',
+  text: `Welcome on mywebsite.fr!
+    Your account is now linked with: <%= user.email %>.`,
+  html: `<h1>Welcome on mywebsite.fr!</h1>
+    <p>Your account is now linked with: <%= user.email %>.<p>`,
+},
+
+const emailOptions = strapi.plugins.email.services.email.fillEmailOptions(
+  {
+    to: user.email,
+    // from: is not specified, so it's the defaultFrom that will be used instead
+  },
+  emailTemplate,
+  {
+    user: _.pick(user, ['username', 'email']),
+  },
+);
+
+await strapi.plugins.email.services.email.send(emailOptions);
 ```
 
 ## Configure the plugin

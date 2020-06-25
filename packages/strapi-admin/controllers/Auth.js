@@ -315,25 +315,22 @@ module.exports = {
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    const settings = {
-      object: 'Reset password',
-      message: `<p>We heard that you lost your password. Sorry about that!</p>
-
-<p>But don’t worry! You can use the following link to reset your password:</p>
-
-<p>${url}?code=${resetPasswordToken}</p>
-
-<p>Thanks.</p>`,
-    };
+    const emailOptions = strapi.plugins.email.services.email.fillEmailOptions(
+      {
+        to: admin.email,
+        from: strapi.admin.config.forgotPassword.from,
+        replyTo: strapi.admin.config.forgotPassword.replyTo,
+      },
+      strapi.admin.config.forgotPassword.emailTemplate,
+      {
+        url,
+        resetPasswordToken,
+        user: _.pick(admin, ['email', 'username']),
+      }
+    );
 
     try {
-      // Send an email to the admin.
-      await strapi.plugins['email'].services.email.send({
-        to: admin.email,
-        subject: 'Reset password',
-        text: settings.message,
-        html: settings.message,
-      });
+      await strapi.plugins.email.services.email.send(emailOptions);
     } catch (err) {
       return ctx.badRequest(null, err);
     }
