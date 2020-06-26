@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --experimental-repl-await
 'use strict';
 
 const _ = require('lodash');
